@@ -12,6 +12,8 @@ Na imagem abaixo, temos um exemplo da execução das duas threads.
 # No Deadlock Version
 Para corrigir a espera circular citada no caso acima, foi necessário fazer pequenas alterações para que uma função não ficasse em espera para sempre (até que a outra libere o recurso).
 
-Agora ***fsum***, em posse do recurso **A**, faz **5** tentativas para conseguir o recurso **B**, se não o conseguir, libera **A** e reinicia a função após alguns segundos.
+Agora ***fsum***, em posse do recurso **A**, faz **5** tentativas para conseguir o recurso **B**, se não o conseguir, libera **A** e reinicia a função após alguns segundos. Na função ***fsub*** também foram feitas as mesmas modificações.
+
+Abaixo, é possível visualizar como as threads se comportam, e observar as suas conclusões (calculam a soma e subtração entre 10 e 3).
 
 ![alt text](nndl.png)
