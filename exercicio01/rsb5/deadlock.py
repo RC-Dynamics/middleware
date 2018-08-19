@@ -9,12 +9,12 @@ b = 3
 
 def fsum():
     print "init sum thread"
-    while (not lock_A.acquire(False)):
+    while (not lock_A.acquire()):
         print "fsum fail lock A"
         sleep(randint(1,5))
     sleep(2)
     print "fsum lock A"
-    while (not lock_B.acquire(False)):
+    while (not lock_B.acquire()):
         print "fsum fail lock B"
         sleep(randint(1,5))
 
@@ -25,12 +25,12 @@ def fsum():
 
 def fsub():
     print "init sub thread"
-    while (not lock_B.acquire(False)):
+    while (not lock_B.acquire()):
         print "fsub fail lock B"
         sleep(randint(1,5))
     sleep(2)
     print "fsub lock B"
-    while (not lock_A.acquire(False)):
+    while (not lock_A.acquire()):
         print "fsub fail lock A"
         sleep(randint(1,5))
 
