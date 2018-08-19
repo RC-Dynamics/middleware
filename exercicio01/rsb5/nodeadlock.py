@@ -8,7 +8,7 @@ a = 10
 b = 3
 
 def fsum():
-    tries = 0;
+    tries = 0
     print "init sum thread"
     while (not lock_A.acquire(False)):
         print "fsum fail lock A"
