@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // BUFFERSIZE for file transfer
@@ -19,12 +20,24 @@ func main() {
 	}
 	address := os.Args[1]
 
-	// BechMarket here
-	conn, err := net.Dial("tcp", address)
+	file, err := os.Create("result.csv")
 	checkError(err)
-	requestFileTCP("lucas.txt", conn)
-	conn.Close()
-	// To here
+	defer file.Close()
+
+	// BechMarket here
+	for i := 0; i < 1000; i++ {
+		time1 := time.Now()
+		conn, err := net.Dial("tcp", address)
+		checkError(err)
+		requestFileTCP("lucas.txt", conn)
+		conn.Close()
+		time2 := time.Now()
+		elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
+		fmt.Fprintln(file, elapsedTime)
+		checkError(err)
+		// To here
+
+	}
 
 	os.Exit(0)
 }
