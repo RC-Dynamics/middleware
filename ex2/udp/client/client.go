@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // BUFFERSIZE for file transfer
@@ -18,11 +19,30 @@ func main() {
 	}
 	address := os.Args[1]
 
-	conn, err := net.Dial("udp", address)
-	checkError(err)
-	defer conn.Close()
+	for _, input := range []string{"test-1KB.txt", "test-1MB.txt"} {
+		for _, qtd := range []int{1000, 5000, 10000} {
+			filename := "result" + input[4:8] + "-" + strconv.Itoa(qtd/1000) + "k.csv"
+			fmt.Println(filename)
+			file, err := os.Create(filename)
+			checkError(err)
+			defer file.Close()
+			// BechMarket here
+			for i := 0; i < qtd; i++ {
+				time1 := time.Now()
+				conn, err := net.Dial("udp", address)
+				checkError(err)
+				requestFileUDP(input, conn)
+				conn.Close()
+				time2 := time.Now()
+				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
+				fmt.Fprintln(file, elapsedTime)
+				checkError(err)
+				time.Sleep(10 * time.Millisecond)
+				// To here
+			}
 
-	requestFileUDP("tdp.pdf", conn)
+		}
+	}
 
 	os.Exit(0)
 }
@@ -37,7 +57,7 @@ func requestFileUDP(fileName string, conn net.Conn) {
 	_, err = conn.Read(bufferFileSize)
 	checkError(err)
 	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
-	fmt.Println("Resquested fileSize: ", fileSize)
+	// fmt.Println("Resquested fileSize: ", fileSize)
 
 	// Getting File:
 	file, err := os.Create(fileName)
@@ -60,7 +80,7 @@ func requestFileUDP(fileName string, conn net.Conn) {
 			break
 		}
 	}
-	fmt.Println("File Received: ", fileName, "  Size: ", recSize)
+	// fmt.Println("File Received: ", fileName, "  Size: ", recSize)
 
 }
 
