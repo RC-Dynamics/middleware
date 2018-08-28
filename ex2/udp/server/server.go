@@ -20,15 +20,6 @@ func main() {
 		checkError(err)
 		handleClientUDP(pc)
 	}
-
-	// for {
-	// 	conn, err := listener.Accept()
-
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	// 	go handleClientUDP(conn)
-	// }
 }
 
 func handleClientUDP(conn net.PacketConn) {
@@ -51,7 +42,7 @@ func handleClientUDP(conn net.PacketConn) {
 	_, err = conn.WriteTo([]byte(fileSize), addr)
 	checkError(err)
 
-	fmt.Println("FileName: ", fileName, "   Size: ", fileInfo.Size())
+	fmt.Println("Sending -> Name: ", fileName, "   Size: ", fileInfo.Size())
 
 	// Sending File:
 	sendBuffer := make([]byte, BUFFERSIZE)

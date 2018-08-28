@@ -22,7 +22,7 @@ func main() {
 	checkError(err)
 	defer conn.Close()
 
-	requestFileUDP("123.JPG", conn)
+	requestFileUDP("tdp.pdf", conn)
 
 	os.Exit(0)
 }
@@ -37,7 +37,7 @@ func requestFileUDP(fileName string, conn net.Conn) {
 	_, err = conn.Read(bufferFileSize)
 	checkError(err)
 	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
-	fmt.Println("FileSize: ", fileSize)
+	fmt.Println("Resquested fileSize: ", fileSize)
 
 	// Getting File:
 	file, err := os.Create(fileName)
@@ -50,17 +50,17 @@ func requestFileUDP(fileName string, conn net.Conn) {
 	for {
 		conn.Read(recBuffer)
 		if (fileSize - recSize) < BUFFERSIZE {
-			file.WriteAt(recBuffer, (fileSize - recSize))
-			recSize = fileSize
+			file.Write(recBuffer[:(fileSize - recSize)])
+			recSize += (fileSize - recSize)
 			break
 		}
-		fmt.Println(recSize)
-		file.WriteAt(recBuffer, BUFFERSIZE)
+		file.Write(recBuffer)
 		recSize += BUFFERSIZE
 		if recSize == fileSize {
 			break
 		}
 	}
+	fmt.Println("File Received: ", fileName, "  Size: ", recSize)
 
 }
 
