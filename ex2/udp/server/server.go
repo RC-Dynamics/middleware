@@ -15,24 +15,27 @@ const BUFFERSIZE = 1024
 // Main Server
 func main() {
 	service := ":8080"
-
-	listener, err := net.Listen("tcp", service)
-	checkError(err)
-
 	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
-		go handleClientTCP(conn)
+		pc, err := net.ListenPacket("udp", service)
+		checkError(err)
+		handleClientUDP(pc)
 	}
+
+	// for {
+	// 	conn, err := listener.Accept()
+
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	// 	go handleClientUDP(conn)
+	// }
 }
 
-func handleClientTCP(conn net.Conn) {
+func handleClientUDP(conn net.PacketConn) {
 	defer conn.Close()
 	// Getting File Name
 	bufferFileName := make([]byte, 50)
-	_, err := conn.Read(bufferFileName)
+	_, addr, err := conn.ReadFrom(bufferFileName)
 	checkError(err)
 	fileName := strings.Trim(string(bufferFileName), ":")
 
@@ -45,7 +48,7 @@ func handleClientTCP(conn net.Conn) {
 
 	// Sending Size
 	fileSize := fillString(strconv.FormatInt(fileInfo.Size(), 10), 15)
-	_, err = conn.Write([]byte(fileSize))
+	_, err = conn.WriteTo([]byte(fileSize), addr)
 	checkError(err)
 
 	fmt.Println("FileName: ", fileName, "   Size: ", fileInfo.Size())
@@ -59,7 +62,7 @@ func handleClientTCP(conn net.Conn) {
 		} else {
 			checkError(err)
 		}
-		conn.Write(sendBuffer)
+		conn.WriteTo(sendBuffer, addr)
 	}
 	// we're finished with this client
 }

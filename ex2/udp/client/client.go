@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"os"
 	"strconv"
@@ -19,16 +18,16 @@ func main() {
 	}
 	address := os.Args[1]
 
-	// BechMarket here
-	conn, err := net.Dial("tcp", address)
+	conn, err := net.Dial("udp", address)
 	checkError(err)
-	requestFileTCP("lucas.txt", conn)
-	conn.Close()
+	defer conn.Close()
+
+	requestFileUDP("123.JPG", conn)
 
 	os.Exit(0)
 }
 
-func requestFileTCP(fileName string, conn net.Conn) {
+func requestFileUDP(fileName string, conn net.Conn) {
 	// Sending File Name
 	_, err := conn.Write([]byte(fillString(fileName, 50)))
 	checkError(err)
@@ -47,14 +46,16 @@ func requestFileTCP(fileName string, conn net.Conn) {
 
 	var recSize int64
 	recSize = 0
+	recBuffer := make([]byte, BUFFERSIZE)
 	for {
+		conn.Read(recBuffer)
 		if (fileSize - recSize) < BUFFERSIZE {
-			io.CopyN(file, conn, (fileSize - recSize))
-			conn.Read(make([]byte, (recSize+BUFFERSIZE)-fileSize))
+			file.WriteAt(recBuffer, (fileSize - recSize))
 			recSize = fileSize
 			break
 		}
-		io.CopyN(file, conn, BUFFERSIZE)
+		fmt.Println(recSize)
+		file.WriteAt(recBuffer, BUFFERSIZE)
 		recSize += BUFFERSIZE
 		if recSize == fileSize {
 			break
