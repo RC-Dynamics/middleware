@@ -20,22 +20,30 @@ func main() {
 	}
 	address := os.Args[1]
 
-	file, err := os.Create("result.csv")
-	checkError(err)
-	defer file.Close()
+	for _, input := range []string{"test-1KB.txt", "test-1MB.txt"} {
+		for _, qtd := range []int{1000, 5000, 10000} {
+			filename := "result" + input[4:8] + "-" + strconv.Itoa(qtd/1000) + "k.csv"
+			fmt.Println(filename)
+			file, err := os.Create(filename)
+			checkError(err)
+			defer file.Close()
+			// BechMarket here
+			for i := 0; i < qtd; i++ {
+				time1 := time.Now()
+				conn, err := net.Dial("tcp", address)
+				checkError(err)
+				requestFileTCP(input, conn)
+				conn.Close()
+				time2 := time.Now()
+				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
+				fmt.Fprintln(file, elapsedTime)
+				checkError(err)
+				time.Sleep(100 * time.Millisecond)
+				// To here
+			}
 
-	// BechMarket here
-	for i := 0; i < 10000; i++ {
-		time1 := time.Now()
-		conn, err := net.Dial("tcp", address)
-		checkError(err)
-		requestFileTCP("test.txt", conn)
-		conn.Close()
-		time2 := time.Now()
-		elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
-		fmt.Fprintln(file, elapsedTime)
-		checkError(err)
-		// To here
+		}
+
 	}
 
 	os.Exit(0)
@@ -51,7 +59,7 @@ func requestFileTCP(fileName string, conn net.Conn) {
 	_, err = conn.Read(bufferFileSize)
 	checkError(err)
 	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
-	fmt.Println("FileSize: ", fileSize)
+	// fmt.Println("FileSize: ", fileSize)
 
 	// Getting File:
 	file, err := os.Create(fileName)
