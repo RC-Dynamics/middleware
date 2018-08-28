@@ -24,6 +24,7 @@ func main() {
 	checkError(err)
 	requestFileTCP("lucas.txt", conn)
 	conn.Close()
+	// To here
 
 	os.Exit(0)
 }
