@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // BUFFERSIZE for file transfer
@@ -19,6 +20,7 @@ func main() {
 		pc, err := net.ListenPacket("udp", service)
 		checkError(err)
 		handleClientUDP(pc)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
@@ -54,6 +56,7 @@ func handleClientUDP(conn net.PacketConn) {
 			checkError(err)
 		}
 		conn.WriteTo(sendBuffer, addr)
+		time.Sleep(2 * time.Microsecond)
 	}
 	// we're finished with this client
 }
