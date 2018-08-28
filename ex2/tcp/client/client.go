@@ -25,7 +25,7 @@ func main() {
 	defer file.Close()
 
 	// BechMarket here
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 10000; i++ {
 		time1 := time.Now()
 		conn, err := net.Dial("tcp", address)
 		checkError(err)
