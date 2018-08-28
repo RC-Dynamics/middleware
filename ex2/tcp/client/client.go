@@ -29,14 +29,13 @@ func main() {
 		time1 := time.Now()
 		conn, err := net.Dial("tcp", address)
 		checkError(err)
-		requestFileTCP("lucas.txt", conn)
+		requestFileTCP("test.txt", conn)
 		conn.Close()
 		time2 := time.Now()
 		elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
 		fmt.Fprintln(file, elapsedTime)
 		checkError(err)
 		// To here
-
 	}
 
 	os.Exit(0)
