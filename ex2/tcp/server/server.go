@@ -48,7 +48,7 @@ func handleClientTCP(conn net.Conn) {
 	_, err = conn.Write([]byte(fileSize))
 	checkError(err)
 
-	fmt.Println("FileName: ", fileName, "   Size: ", fileInfo.Size())
+	fmt.Println("Sending -> Name: ", fileName, "   Size: ", fileInfo.Size())
 
 	// Sending File:
 	sendBuffer := make([]byte, BUFFERSIZE)

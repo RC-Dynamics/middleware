@@ -38,12 +38,11 @@ func main() {
 				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
 				fmt.Fprintln(file, elapsedTime)
 				checkError(err)
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 				// To here
 			}
 
 		}
-
 	}
 
 	os.Exit(0)
@@ -81,6 +80,8 @@ func requestFileTCP(fileName string, conn net.Conn) {
 			break
 		}
 	}
+
+	// fmt.Println("File Received: ", fileName, "  Size: ", recSize)
 
 }
 
