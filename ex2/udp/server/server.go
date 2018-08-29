@@ -56,7 +56,7 @@ func handleClientUDP(conn net.PacketConn) {
 			checkError(err)
 		}
 		conn.WriteTo(sendBuffer, addr)
-		time.Sleep(2 * time.Microsecond)
+		time.Sleep(5 * time.Microsecond)
 	}
 	// we're finished with this client
 }
