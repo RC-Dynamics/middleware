@@ -18,7 +18,7 @@ func (handler *ClientHandlerUDP) connect(address string) {
 
 func (handler *ClientHandlerUDP) read(size int) []byte {
 	buffer := make([]byte, size)
-	n, err := handler.conn.Read(buffer)
+	_, err := handler.conn.Read(buffer)
 	checkError(err)
 	return buffer
 }
