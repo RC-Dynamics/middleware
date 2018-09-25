@@ -11,16 +11,17 @@ import (
 )
 
 func main() {
-	filename := "rcp-1k.txt"
+	filename := "rpc-1k.csv"
 	file, err := os.Create(filename)
 	checkError(err)
+
+	client, err := rpc.DialHTTP("tcp", "localhost:8081")
+	if err != nil {
+		log.Fatal("dialing:", err)
+	}
+
 	for i := 0; i < 1000; i++ {
 		time1 := time.Now()
-
-		client, err := rpc.DialHTTP("tcp", "localhost:8081")
-		if err != nil {
-			log.Fatal("dialing:", err)
-		}
 
 		// Synchronous call
 		args := &server.Args{"HELLOWORLD"}

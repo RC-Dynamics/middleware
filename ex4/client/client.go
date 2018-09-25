@@ -3,19 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 )
 
 func main() {
 	address := "localhost:8080"
 
-	clientRequestHandler := ClientRequestHandler{"tcp", nil}
+	clientRequestHandler := ClientRequestHandler{"rpc", nil}
 	clientRequestHandler.connect(address)
 
-	for _, input := range []string{"test-1KB.txt", "test-1MB.txt"} {
-		for _, qtd := range []int{1000, 5000, 10000} {
-			filename := "result" + input[4:8] + "-" + strconv.Itoa(qtd/1000) + "k.csv"
+	for _, input := range []string{"rpc-1k-middleware.csv"} {
+		for _, qtd := range []int{1000} {
+			filename := input
 			fmt.Println(filename)
 			file, err := os.Create(filename)
 			checkError(err)
