@@ -26,6 +26,9 @@ func (server *ServerHandler) create() {
 	case "udp":
 		server.handler = &ServerHandlerUDP{server.port, nil, nil}
 		// conn = handlerUDP.crete(port)
+	case "rpc":
+		server.handler = &ServerHandlerRPC{server.port}
+		// conn = handlerUDP.crete(port)
 	}
 	server.handler.create()
 }

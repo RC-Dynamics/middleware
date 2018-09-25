@@ -23,6 +23,8 @@ func (client *ClientRequestHandler) connect(address string) {
 		client.handler = &ClientHandlerTCP{"", nil}
 	case "udp":
 		client.handler = &ClientHandlerUDP{"", nil}
+	case "rpc":
+		client.handler = &ClientHandlerRPC{"", nil, nil}
 	}
 	client.handler.connect(address)
 }
