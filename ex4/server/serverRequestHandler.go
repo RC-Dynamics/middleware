@@ -1,37 +1,38 @@
 package main
 
-import "net"
+type Handler interface {
+	create()
+	read(int) []byte
+	send([]byte)
+	close()
+}
 
 type ServerHandler struct {
 	tp      string
-	port    int
-	conn    net.Conn
-	addr    net.Addr
-	handler interface{}
+	port    string
+	handler Handler
 }
 
 func (server *ServerHandler) create() {
 	switch server.tp {
 	case "tcp":
-		server.handler = ServerHandlerTCP{server.port}
+		server.handler = ServerHandlerTCP{server.port, nil}
 		// conn = handlerTCP.create(port)
 	case "udp":
-		server.handler = ServerHandlerUDP{server.port}
+		server.handler = ServerHandlerUDP{server.port, nil, nil}
 		// conn = handlerUDP.crete(port)
 	}
-	server.conn = server.handler.create()
+	server.handler.create()
 }
 
-func (server *ServerHandler) read(int size) {
-	buff, addr := server.handler.read(size, conn)
-	server.addr = addr
-	return buff
+func (server *ServerHandler) read(size int) []byte {
+	return server.handler.read(size)
 }
 
 func (server *ServerHandler) send(buff []byte) {
-	server.handler.send(buff, server.conn, server.addr)
+	server.handler.send(buff)
 }
 
 func (server *ServerHandler) close() {
-	server.conn.Close()
+	server.handler.close()
 }

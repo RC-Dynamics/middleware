@@ -3,34 +3,34 @@ package main
 import (
 	"fmt"
 	"net"
-	"os"
 )
 
 type ServerHandlerUDP struct {
-	port int
+	port string
+	addr net.Addr
+	conn net.PacketConn
 }
 
-func (handler *ServerHandlerUDP) create() {
-	conn, err := net.ListenPacket("udp", ":"+string(handler.port))
-	handler.checkError(err)
-	return conn
+func (handler ServerHandlerUDP) create() {
+	conn, err := net.ListenPacket("udp", handler.port)
+	checkError(err)
+	handler.conn = conn
+	fmt.Println(handler.conn)
 }
 
-func (handler *ServerHandlerUDP) read(size int, conn net.Conn) []byte {
+func (handler ServerHandlerUDP) read(size int) []byte {
 	buffer := make([]byte, size)
-	_, addr, err := conn.ReadFrom(buffer)
-	handler.checkError(err)
-	return buffer, addr
+	_, addr, err := handler.conn.ReadFrom(buffer)
+	handler.addr = addr
+	checkError(err)
+	return buffer
 }
 
-func (handler *ServerHandlerUDP) send(buffer []byte, addr net.Addr, conn net.Conn) {
-	_, err = conn.WriteTo(buffer, addr)
-	handler.checkError(err)
+func (handler ServerHandlerUDP) send(buffer []byte) {
+	_, err := handler.conn.WriteTo(buffer, handler.addr)
+	checkError(err)
 }
 
-func (handler *ServerHandlerUDP) checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
-		os.Exit(1)
-	}
+func (handler ServerHandlerUDP) close() {
+	handler.conn.Close()
 }
