@@ -2,13 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net"
 	"os"
 	"strconv"
-	"strings"
 	"time"
-	"clientRequestHandler"
 )
 
 func main() {
@@ -25,12 +21,12 @@ func main() {
 			for i := 0; i < qtd; i++ {
 				time1 := time.Now()
 
-				
-				clientRequestHandler.connect("tcp", address)
-				
-				// Application
-				clientRequestHandler.send("tcp", []byte("HELLOWORLD"))
+				clientRequestHandler := ClientRequestHandler{"tcp", nil}
+				clientRequestHandler.connect(address)
 
+				// Application
+				clientRequestHandler.send([]byte("HELLOWORLD"))
+				clientRequestHandler.read(10)
 
 				time2 := time.Now()
 				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
@@ -38,10 +34,11 @@ func main() {
 				checkError(err)
 				time.Sleep(10 * time.Millisecond)
 				// To here
+				clientRequestHandler.close()
 			}
 
 		}
 	}
-	clientRequestHandler.close()
+
 	os.Exit(0)
 }

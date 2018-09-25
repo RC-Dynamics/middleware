@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 type Handler interface {
 	create()
 	read(int) []byte
@@ -35,4 +40,11 @@ func (server *ServerHandler) send(buff []byte) {
 
 func (server *ServerHandler) close() {
 	server.handler.close()
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
+		os.Exit(1)
+	}
 }

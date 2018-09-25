@@ -1,32 +1,33 @@
-package clientHandlerTCP
-
+package main
 
 import (
 	"net"
-	"fmt"
 )
 
-func create(address string) {
+type ClientHandlerTCP struct {
+	address string
+	conn    net.Conn
+}
+
+func (handler *ClientHandlerTCP) connect(address string) {
 	conn, err := net.Dial("tcp", address)
 	checkError(err)
-	return conn
+	handler.address = address
+	handler.conn = conn
 }
 
-func read(size int, conn net.Conn) []byte {
+func (handler *ClientHandlerTCP) read(size int) []byte {
 	buffer := make([]byte, size)
-	_, err := conn.Read(buffer)
+	_, err := handler.conn.Read(buffer)
 	checkError(err)
-	return buffer	
+	return buffer
 }
 
-func send(buffer []byte, conn net.Conn){
-	_, err := conn.Write(buffer)
+func (handler *ClientHandlerTCP) send(buffer []byte) {
+	_, err := handler.conn.Write(buffer)
 	checkError(err)
 }
 
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
-		os.Exit(1)
-	}
+func (handler *ClientHandlerTCP) close() {
+	handler.conn.Close()
 }

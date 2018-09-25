@@ -1,33 +1,33 @@
-package clientHandlerUDP
-
+package main
 
 import (
 	"net"
-	"fmt"
 )
 
-func create(address string) {
-	conn, err := net.Dial("udp", address)
-	checkError(err)
-	return conn
+type ClientHandlerUDP struct {
+	address string
+	conn    net.Conn
 }
 
-func read(size int, conn net.Conn) []byte {
+func (handler *ClientHandlerUDP) connect(address string) {
+	conn, err := net.Dial("udp", address)
+	checkError(err)
+	handler.address = address
+	handler.conn = conn
+}
+
+func (handler *ClientHandlerUDP) read(size int) []byte {
 	buffer := make([]byte, size)
-	n, err := conn.Read(buffer)
+	n, err := handler.conn.Read(buffer)
 	checkError(err)
 	return buffer
 }
 
-func send(buffer []byte, addr net.Addr, conn net.Conn){
-	_, err := conn.Write(buffer)
+func (handler *ClientHandlerUDP) send(buffer []byte) {
+	_, err := handler.conn.Write(buffer)
 	checkError(err)
 }
 
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
-		os.Exit(1)
-	}
+func (handler *ClientHandlerUDP) close() {
+	handler.conn.Close()
 }
-

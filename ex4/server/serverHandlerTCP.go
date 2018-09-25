@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"net"
-	"os"
 )
 
 type ServerHandlerTCP struct {
@@ -32,11 +30,4 @@ func (handler *ServerHandlerTCP) send(buffer []byte) {
 
 func (handler *ServerHandlerTCP) close() {
 	handler.conn.Close()
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
-		os.Exit(1)
-	}
 }

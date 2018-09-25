@@ -1,42 +1,47 @@
-package clientRequestHandler
+package main
 
 import (
-	"net"
-	"clientHandlerTCP"
-	"clientHandlerUDP"
+	"fmt"
+	"os"
 )
 
-conn net.Conn
-addr net.Addr
-
-func connect(tp string, address string){
- switch  tp{
- case "tcp":
-	conn = clientHandlerTCP.create(address)
- case "udp":
-	conn = clientHandlerUDP.create(address)
- }
+type Handler interface {
+	connect(string)
+	read(int) []byte
+	send([]byte)
+	close()
 }
 
+type ClientRequestHandler struct {
+	tp      string
+	handler Handler
+}
 
-func read(int size){
-    switch  tp{
+func (client *ClientRequestHandler) connect(address string) {
+	switch client.tp {
 	case "tcp":
-	   conn = clientHandlerTCP.read(size, conn)
+		client.handler = &ClientHandlerTCP{"", nil}
 	case "udp":
-	   conn, addr = clientHandlerUDP.read(size, conn)
+		client.handler = &ClientHandlerUDP{"", nil}
 	}
+	client.handler.connect(address)
 }
 
-func send(tp string, buff []byte){
-	switch  tp{
-	case "tcp":
-	   conn = clientHandlerTCP.send(buff, conn)
-	case "udp":
-	   conn = clientHandlerUDP.send(buff, addr, conn)
-	}
+func (client *ClientRequestHandler) read(size int) []byte {
+	return client.handler.read(size)
 }
 
-func close(){
-	conn.Close()
+func (client *ClientRequestHandler) send(buff []byte) {
+	client.handler.send(buff)
+}
+
+func (client *ClientRequestHandler) close() {
+	client.handler.close()
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Fatal error: %s ", err.Error())
+		os.Exit(1)
+	}
 }
