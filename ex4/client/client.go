@@ -26,7 +26,7 @@ func main() {
 
 				// Application
 				clientRequestHandler.send([]byte("HELLOWORLD"))
-				clientRequestHandler.read(10)
+				fmt.Fprintf(os.Stderr, "%s\n", string(clientRequestHandler.read(10)))
 
 				time2 := time.Now()
 				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
