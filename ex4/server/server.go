@@ -6,7 +6,7 @@ import (
 
 // Main Server
 func main() {
-	serverRequestHandler := ServerHandler{"tcp", ":8080", nil}
+	serverRequestHandler := ServerHandler{"rpc", ":8080", nil}
 	serverRequestHandler.create()
 	for {
 		data := string(serverRequestHandler.read(10))
