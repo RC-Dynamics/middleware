@@ -10,8 +10,8 @@ func main() {
 	serverRequestHandler.create()
 	for {
 		data := string(serverRequestHandler.read(10))
-		// fmt.Fprintf(os.Stderr, "%s\n", data)
 		serverRequestHandler.send([]byte(strings.ToLower(data)))
+		// fmt.Fprintf(os.Stderr, "%s\n", data)
 	}
 	serverRequestHandler.close()
 }

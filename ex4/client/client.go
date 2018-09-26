@@ -25,6 +25,7 @@ func main() {
 
 				// Application
 				clientRequestHandler.send([]byte("HELLOWORLD"))
+				clientRequestHandler.read(10)
 
 				time2 := time.Now()
 				// fmt.Fprintf(os.Stderr, "%s\n", string(clientRequestHandler.read(10)))
