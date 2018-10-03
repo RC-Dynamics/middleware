@@ -3,18 +3,19 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 )
 
 func main() {
 	address := "localhost:8080"
 
-	clientRequestHandler := ClientRequestHandler{"rpc", nil}
-	clientRequestHandler.connect(address)
+	for _, mid_type := range []string{"rpc"} {
+		clientRequestHandler := ClientRequestHandler{mid_type, nil}
+		clientRequestHandler.connect(address)
 
-	for _, input := range []string{"rpc-1k-middleware.csv"} {
-		for _, qtd := range []int{1000} {
-			filename := input
+		for _, qtd := range []int{1000, 5000, 10000} {
+			filename := mid_type + "-" + strconv.Itoa(qtd/1000) + "k-middleware.csv"
 			fmt.Println(filename)
 			file, err := os.Create(filename)
 			checkError(err)
@@ -38,8 +39,8 @@ func main() {
 			}
 
 		}
+		clientRequestHandler.close()
 	}
-	clientRequestHandler.close()
 
 	os.Exit(0)
 }
