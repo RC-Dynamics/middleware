@@ -5,8 +5,9 @@ import (
 )
 
 type ServerHandlerTCP struct {
-	port string
-	conn net.Conn
+	port     string
+	conn     net.Conn
+	listener net.Listener
 }
 
 func (handler *ServerHandlerTCP) create() {
@@ -14,6 +15,7 @@ func (handler *ServerHandlerTCP) create() {
 	checkError(err)
 	conn, err := listener.Accept()
 	handler.conn = conn
+	handler.listener = listener
 }
 
 func (handler *ServerHandlerTCP) read(size int) []byte {
@@ -30,4 +32,5 @@ func (handler *ServerHandlerTCP) send(buffer []byte) {
 
 func (handler *ServerHandlerTCP) close() {
 	handler.conn.Close()
+	handler.listener.Close()
 }

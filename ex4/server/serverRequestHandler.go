@@ -21,7 +21,7 @@ type ServerHandler struct {
 func (server *ServerHandler) create() {
 	switch server.tp {
 	case "tcp":
-		server.handler = &ServerHandlerTCP{server.port, nil}
+		server.handler = &ServerHandlerTCP{server.port, nil, nil}
 		// conn = handlerTCP.create(port)
 	case "udp":
 		server.handler = &ServerHandlerUDP{server.port, nil, nil}

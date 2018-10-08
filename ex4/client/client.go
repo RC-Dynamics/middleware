@@ -10,9 +10,7 @@ import (
 func main() {
 	address := "localhost:8080"
 
-	for _, mid_type := range []string{"rpc"} {
-		clientRequestHandler := ClientRequestHandler{mid_type, nil}
-		clientRequestHandler.connect(address)
+	for _, mid_type := range []string{"tcp"} {
 
 		for _, qtd := range []int{1000, 5000, 10000} {
 			filename := mid_type + "-" + strconv.Itoa(qtd/1000) + "k-middleware.csv"
@@ -23,11 +21,14 @@ func main() {
 			// BechMarket here
 			for i := 0; i < qtd; i++ {
 				time1 := time.Now()
+				clientRequestHandler := ClientRequestHandler{mid_type, nil}
+				clientRequestHandler.connect(address)
 
 				// Application
 				clientRequestHandler.send([]byte("HELLOWORLD"))
 				clientRequestHandler.read(10)
 
+				clientRequestHandler.close()
 				time2 := time.Now()
 				// fmt.Fprintf(os.Stderr, "%s\n", string(clientRequestHandler.read(10)))
 				elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
@@ -39,7 +40,6 @@ func main() {
 			}
 
 		}
-		clientRequestHandler.close()
 	}
 
 	os.Exit(0)
