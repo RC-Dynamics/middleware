@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
 	"runtime"
 	"strings"
+	"time"
 )
 
 type Handler interface {
@@ -25,7 +27,7 @@ type ServerHandler struct {
 func (server *ServerHandler) create() {
 	switch server.tp {
 	case "tcp":
-		server.handler = &ServerHandlerTCP{server.port, nil}
+		server.handler = &ServerHandlerTCP{server.port, nil, nil}
 		// conn = handlerTCP.create(port)
 		// case "udp":
 		// 	server.handler = &ServerHandlerUDP{server.port, nil, nil}
@@ -62,63 +64,63 @@ type ServerFunc interface {
 }
 
 type ClientProxy struct {
-	address string
+	Address string
 }
 
 type StringProxy struct {
-	client_prxy ClientProxy
+	Client_proxy ClientProxy
 }
 
 type Invocation struct {
-	address     string
-	method_name string
-	parameters  []string
+	Address     string
+	Method_name string
+	Parameters  []string
 }
 
 type Termination struct {
-	result string
+	Result string
 }
 
 type MessageHeader struct {
-	magic       string
-	version     int
-	byteOrders  bool
-	messageType int
-	messageSize int
+	Magic       string
+	Version     int
+	ByteOrders  bool
+	MessageType int
+	MessageSize int
 }
 
 type RequestHeader struct {
-	context          string
-	id               int
-	responseExpected bool
-	objectKey        int
-	operation        string
+	Context          string
+	Id               int
+	ResponseExpected bool
+	ObjectKey        int
+	Operation        string
 }
 
 type RequestBody struct {
-	parameters []string
+	Parameters []string
 }
 
 type ReplyHeader struct {
-	serviceContext string
-	id             int
-	status         int
+	ServiceContext string
+	Id             int
+	Status         int
 }
 
 type ReplyBody struct {
-	result string
+	Result string
 }
 
 type MessageBody struct {
-	requestHeader RequestHeader
-	requestBody   RequestBody
-	replyHeader   ReplyHeader
-	replyBody     ReplyBody
+	RequestHeader RequestHeader
+	RequestBody   RequestBody
+	ReplyHeader   ReplyHeader
+	ReplyBody     ReplyBody
 }
 
 type Message struct {
-	header MessageHeader
-	body   MessageBody
+	Header MessageHeader
+	Body   MessageBody
 }
 
 func GetFunctionName(i interface{}) string {
@@ -136,58 +138,66 @@ func (proxy *StringProxy) toLower(str string) string {
 func invoke(clientProxy ClientProxy) Termination {
 	srh := ServerHandler{
 		tp:   "tcp",
-		port: clientProxy.address,
+		port: clientProxy.Address,
 	}
-	srh.create()
 
 	stringProxy := StringProxy{}
 	ter := Termination{}
 
 	for {
-		msgToBeUnmarshalled := srh.read(10)
+		srh.create()
+
+		msgToBeUnmarshalled := srh.read(500)
+		msgToBeUnmarshalled = bytes.Trim(msgToBeUnmarshalled, "\x00")
 
 		var msgUnmarshalled Message
 
 		json.Unmarshal(msgToBeUnmarshalled, &msgUnmarshalled)
+		// fmt.Print(msgToBeUnmarshalled)
+		// fmt.Println(" - " + msgUnmarshalled.Body.RequestHeader.Operation)
 
-		// TODO: processar
-		if msgUnmarshalled.body.requestHeader.operation == "toUpper" {
-			stringProxy.toUpper(msgUnmarshalled.body.requestBody.parameters[0])
-		} else if msgUnmarshalled.body.requestHeader.operation == "toLower" {
-			stringProxy.toLower(msgUnmarshalled.body.requestBody.parameters[0])
+		if msgUnmarshalled.Body.RequestHeader.Operation == "toUpper" {
+			ter.Result = stringProxy.toUpper(msgUnmarshalled.Body.RequestBody.Parameters[0])
+		} else if msgUnmarshalled.Body.RequestHeader.Operation == "toLower" {
+			ter.Result = stringProxy.toLower(msgUnmarshalled.Body.RequestBody.Parameters[0])
 		}
 
 		replyHeader := ReplyHeader{
-			serviceContext: "",
-			id:             0,
-			status:         0,
+			ServiceContext: "",
+			Id:             0,
+			Status:         0,
 		}
 
 		replyBody := ReplyBody{
-			result: ter.result,
+			Result: ter.Result,
 		}
 
 		messageHeader := MessageHeader{
-			magic:       "protocolo",
-			version:     0,
-			byteOrders:  false,
-			messageType: 0,
-			messageSize: 0,
+			Magic:       "protocolo",
+			Version:     0,
+			ByteOrders:  false,
+			MessageType: 0,
+			MessageSize: 0,
 		}
 
 		messageBody := MessageBody{
-			replyHeader: replyHeader,
-			replyBody:   replyBody,
+			ReplyHeader: replyHeader,
+			ReplyBody:   replyBody,
 		}
 
 		msgtoBeMarshalled := Message{
-			header: messageHeader,
-			body:   messageBody,
+			Header: messageHeader,
+			Body:   messageBody,
 		}
 
-		msgMarshalled, _ := json.Marshal(msgtoBeMarshalled)
+		msgMarshalled, err := json.Marshal(msgtoBeMarshalled)
+		checkError(err)
+
+		time.Sleep(10 * time.Millisecond)
 
 		srh.send(msgMarshalled)
+
+		srh.close()
 
 	}
 }

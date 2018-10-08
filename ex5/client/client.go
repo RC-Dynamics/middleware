@@ -24,10 +24,11 @@ func main() {
 			time1 := time.Now()
 
 			// Application
-			string_proxy.toUpper("HELLOWORLD")
+			string_proxy.toUpper("helloworld")
+			// fmt.Println(string_proxy.toUpper("helloworld"))
 
 			time2 := time.Now()
-			// fmt.Fprintf(os.Stderr, "%s\n", string(clientRequestHandler.read(10)))
+
 			elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
 			fmt.Fprintln(file, elapsedTime)
 			checkError(err)

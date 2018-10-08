@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -57,63 +58,63 @@ type ServerFunc interface {
 }
 
 type ClientProxy struct {
-	address string
+	Address string
 }
 
 type StringProxy struct {
-	client_prxy ClientProxy
+	Client_proxy ClientProxy
 }
 
 type Invocation struct {
-	address     string
-	method_name string
-	parameters  []string
+	Address     string
+	Method_name string
+	Parameters  []string
 }
 
 type Termination struct {
-	result string
+	Result string
 }
 
 type MessageHeader struct {
-	magic       string
-	version     int
-	byteOrders  bool
-	messageType int
-	messageSize int
+	Magic       string
+	Version     int
+	ByteOrders  bool
+	MessageType int
+	MessageSize int
 }
 
 type RequestHeader struct {
-	context          string
-	id               int
-	responseExpected bool
-	objectKey        int
-	operation        string
+	Context          string
+	Id               int
+	ResponseExpected bool
+	ObjectKey        int
+	Operation        string
 }
 
 type RequestBody struct {
-	parameters []string
+	Parameters []string
 }
 
 type ReplyHeader struct {
-	serviceContext string
-	id             int
-	status         int
+	ServiceContext string
+	Id             int
+	Status         int
 }
 
 type ReplyBody struct {
-	result string
+	Result string
 }
 
 type MessageBody struct {
-	requestHeader RequestHeader
-	requestBody   RequestBody
-	replyHeader   ReplyHeader
-	replyBody     ReplyBody
+	RequestHeader RequestHeader
+	RequestBody   RequestBody
+	ReplyHeader   ReplyHeader
+	ReplyBody     ReplyBody
 }
 
 type Message struct {
-	header MessageHeader
-	body   MessageBody
+	Header MessageHeader
+	Body   MessageBody
 }
 
 func GetFunctionName(i interface{}) string {
@@ -122,71 +123,75 @@ func GetFunctionName(i interface{}) string {
 
 func (proxy *StringProxy) toUpper(str string) string {
 	inv := Invocation{
-		address:     proxy.client_prxy.address,
-		method_name: "toUpper",
-		parameters:  []string{str},
+		Address:     proxy.Client_proxy.Address,
+		Method_name: "toUpper",
+		Parameters:  []string{str},
 	}
 	ter := invoke(inv)
-	return ter.result
+	return ter.Result
 }
 
 func (proxy *StringProxy) toLower(str string) string {
 	inv := Invocation{
-		address:     proxy.client_prxy.address,
-		method_name: "toLower",
-		parameters:  []string{str},
+		Address:     proxy.Client_proxy.Address,
+		Method_name: "toLower",
+		Parameters:  []string{str},
 	}
 	ter := invoke(inv)
-	return ter.result
+	return ter.Result
 }
 
 func invoke(inv Invocation) Termination {
 	chr := ClientRequestHandler{
 		tp: "tcp",
 	}
-	chr.connect(inv.address)
+
+	chr.connect(inv.Address)
+
 	reqHeader := RequestHeader{
-		context:          "",
-		id:               0,
-		responseExpected: true,
-		objectKey:        0,
-		operation:        inv.method_name,
+		Context:          "",
+		Id:               0,
+		ResponseExpected: true,
+		ObjectKey:        0,
+		Operation:        inv.Method_name,
 	}
 
 	reqBody := RequestBody{
-		parameters: inv.parameters,
+		Parameters: inv.Parameters,
 	}
 
 	messageHeader := MessageHeader{
-		magic:       "MIOP",
-		version:     0,
-		byteOrders:  false,
-		messageType: 0,
-		messageSize: 0,
+		Magic:       "MIOP",
+		Version:     0,
+		ByteOrders:  false,
+		MessageType: 0,
+		MessageSize: 0,
 	}
 
 	messageBody := MessageBody{
-		requestHeader: reqHeader,
-		requestBody:   reqBody,
+		RequestHeader: reqHeader,
+		RequestBody:   reqBody,
 	}
 
 	msgtoBeMarshalled := Message{
-		header: messageHeader,
-		body:   messageBody,
+		Header: messageHeader,
+		Body:   messageBody,
 	}
 
-	msgMarshalled, _ := json.Marshal(msgtoBeMarshalled)
+	msgMarshalled, err := json.Marshal(msgtoBeMarshalled)
+	checkError(err)
 
 	chr.send(msgMarshalled)
 
-	msgToBeUnmarshalled := chr.read(10)
+	msgToBeUnmarshalled := chr.read(500)
+	msgToBeUnmarshalled = bytes.Trim(msgToBeUnmarshalled, "\x00")
 
 	var msgUnmarshalled Message
 
 	json.Unmarshal(msgToBeUnmarshalled, &msgUnmarshalled)
 
 	ter := Termination{
-		result: msgUnmarshalled.body.replyBody.result,
+		Result: msgUnmarshalled.Body.ReplyBody.Result,
 	}
 
 	chr.close()
