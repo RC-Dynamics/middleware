@@ -186,8 +186,10 @@ func invoke(inv Invocation) Termination {
 	json.Unmarshal(msgToBeUnmarshalled, &msgUnmarshalled)
 
 	ter := Termination{
-		result: msgUnmarshalled.body.replybody.result,
+		result: msgUnmarshalled.body.replyBody.result,
 	}
+
+	chr.close()
 
 	return ter
 }

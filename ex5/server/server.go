@@ -1,17 +1,12 @@
 package main
 
-import (
-	"strings"
-)
-
 // Main Server
 func main() {
-	serverRequestHandler := ServerHandler{"tcp", ":8080", nil}
-	serverRequestHandler.create()
+	address := ":8080"
+	client_proxy := ClientProxy{address}
+
 	for {
-		data := string(serverRequestHandler.read(10))
-		serverRequestHandler.send([]byte(strings.ToLower(data)))
+		invoke(client_proxy)
 		// fmt.Fprintf(os.Stderr, "%s\n", data)
 	}
-	serverRequestHandler.close()
 }
