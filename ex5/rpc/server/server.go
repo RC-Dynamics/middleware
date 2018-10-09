@@ -1,36 +1,36 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
-	"net/http"
-	"net/rpc"
-	"strings"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-type Args struct {
-	Txt string
-}
+const (
+	port = ":50051"
+)
 
-type Str string
+// server is used to implement helloworld.GreeterServer.
+type server struct{}
 
-func (t *Str) Lower(args *Args, reply *string) error {
-	*reply = strings.ToLower(args.Txt)
-	return nil
-}
-
-func (t *Str) Upper(args *Args, reply *string) error {
-	*reply = strings.ToUpper(args.Txt)
-	return nil
+// SayHello implements helloworld.GreeterServer
+func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
 
 func main() {
-	str := new(Str)
-	rpc.Register(str)
-	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", ":8081")
-	if e != nil {
-		log.Fatal("listen error:", e)
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
 	}
-	http.Serve(l, nil)
+	s := grpc.NewServer()
+	pb.RegisterGreeterServer(s, &server{})
+	// Register reflection service on gRPC server.
+	reflection.Register(s)
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 }

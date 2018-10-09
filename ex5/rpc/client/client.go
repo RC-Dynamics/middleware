@@ -1,53 +1,58 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"net/rpc"
 	"os"
 	"strconv"
 	"time"
 
-	"./server"
+	"google.golang.org/grpc"
+)
+
+const (
+	address     = "localhost:50051"
+	defaultName = "world"
 )
 
 func main() {
-	for _, qtd := range []int{1000, 5000, 10000} {
+	for _, qtd := range []int{1} { //, 5000, 10000} {
 		filename := "rpc-" + strconv.Itoa(qtd/1000) + "k.csv"
 		file, err := os.Create(filename)
-		checkError(err)
-		fmt.Println(filename)
-
-		client, err := rpc.DialHTTP("tcp", "localhost:8081")
 		if err != nil {
 			log.Fatal("dialing:", err)
 		}
+		fmt.Println(filename)
 
 		for i := 0; i < qtd; i++ {
 			time1 := time.Now()
-
-			// Synchronous call
-			args := &server.Args{"HELLOWORLD"}
-			var reply string
-			err = client.Call("Str.Lower", args, &reply)
+			conn, err := grpc.Dial(address, grpc.WithInsecure())
 			if err != nil {
-				log.Fatal("call error:", err)
+				log.Fatal("dialing:", err)
 			}
+			c := pb.NewGreeterClient(conn)
+
+			// Contact the server and print out its response.
+			name := defaultName
+			if len(os.Args) > 1 {
+				name = os.Args[1]
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+
+			r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+			log.Printf("Greeting: %s", r.Message)
+
+			cancel()
+			conn.Close()
 			time2 := time.Now()
 			elapsedTime := float64(time2.Sub(time1).Nanoseconds()) / 1000000
 			fmt.Fprintln(file, elapsedTime)
-
 			time.Sleep(10 * time.Millisecond)
-			// fmt.Printf("Lower: %s = %s\n", args.Txt, reply)
-
 		}
 	}
 
-}
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
-		os.Exit(1)
-	}
 }
