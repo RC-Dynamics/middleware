@@ -25,8 +25,8 @@ func main() {
 				clientRequestHandler.connect(address)
 
 				// Application
-				clientRequestHandler.send([]byte("HELLOWORLD"))
-				clientRequestHandler.read(10)
+				clientRequestHandler.send([]byte("helloworld"))
+				clientRequestHandler.read(500)
 
 				clientRequestHandler.close()
 				time2 := time.Now()

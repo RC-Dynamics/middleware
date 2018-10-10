@@ -20,7 +20,7 @@ const (
 func main() {
 	log.Print("Starting Client Test")
 	for _, qtd := range []int{1000, 5000, 10000} {
-		filename := "rpc-" + strconv.Itoa(qtd/1000) + "k.csv"
+		filename := "grpc-" + strconv.Itoa(qtd/1000) + "k.csv"
 		file, err := os.Create(filename)
 		if err != nil {
 			log.Fatal("dialing:", err)
